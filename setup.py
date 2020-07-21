@@ -5,7 +5,7 @@ setup(
    version='0.0.1',
    author='Yuval Boss',
    author_email='yuval@cs.washington.edu',
-   packages=['flow', 'flow.extract'],
+   packages=['flow', 'flow.extract', 'S3Cache.S3Cache'],
    scripts=[],
    url='git@github.com:readicculus/sealnet-mlflow.git',
    license='LICENSE.txt',

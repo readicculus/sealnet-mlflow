@@ -1,0 +1,8 @@
+{
+  "flights": [],
+  "surveys": [],
+  "cameras": [],
+  "species": ["Ringed Seal", "Bearded Seal", "UNK Seal"],
+  "species_mappings": {"UNK Seal": ["Bearded Seal", "Ringed Seal"]},
+  "reviewers": []
+}

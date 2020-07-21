@@ -3,7 +3,8 @@ import os
 import click
 import mlflow
 
-from flow import extract, EXPORT_METADATA_SOURCE
+from flow import extract, EXPORT_METADATA_SOURCE, EXPORT_REGISTRATION_SOURCE
+from flow.extract.eo_ir_pairs_register import eo_ir_pairs_register, eo_ir_pairs_register_fun
 
 client = mlflow.tracking.MlflowClient()
 
@@ -37,12 +38,31 @@ def _get_or_run(entry_point, src, params):
         submitted_run = mlflow.tracking.MlflowClient().get_run(res.run_id)
     return submitted_run
 
+def _get_or_run_debug(func, src, params):
+    submitted_run = check_if_src_exists(src)
+    if not submitted_run:
+        res = func(params)
+        submitted_run = mlflow.tracking.MlflowClient().get_run(res.run_id)
+    return submitted_run
+
 @click.command(help="Generate a dataset from noaadb by filtering out a subset for the experiment.")
 @click.option("--filter_path", help=".")
 def data_setup(filter_path):
     mlflow.active_run()
-    export_meta_run = _get_or_run('eo_ir_pairs_from_noaadb', EXPORT_METADATA_SOURCE ,{'filter_path': filter_path})
-    uri = os.path.join(export_meta_run.info.artifact_uri, extract.OUTPUT_ARTIFACT_DIR, extract.OUTPUT_ARTIFACT_NAME)
+
+    export_meta_run = _get_or_run('eo_ir_pairs_from_noaadb',
+                                  EXPORT_METADATA_SOURCE ,
+                                  {'filter_path': filter_path})
+
+    # export_meta_run = _get_or_run('eo_ir_pairs_register',
+    #                               EXPORT_REGISTRATION_SOURCE ,
+    #                               {'input_run_id': export_meta_run.info.run_id})
+    export_meta_run = _get_or_run_debug(eo_ir_pairs_register_fun,
+                                        EXPORT_REGISTRATION_SOURCE,
+                                        export_meta_run.info.run_id)
+    uri = os.path.join(export_meta_run.info.artifact_uri,
+                       extract.OUTPUT_ARTIFACT_DIR,
+                       extract.OUTPUT_ARTIFACT_NAME)
     x=1
 
 if __name__ == '__main__':
