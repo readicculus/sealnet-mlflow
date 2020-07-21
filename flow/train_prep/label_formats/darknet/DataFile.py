@@ -7,7 +7,7 @@ from datetime import datetime
 from shutil import copyfile
 
 class DataFile(object):
-    def __init__(self, n_classes=None, f_train=None, f_valid=None, f_test=None, f_names=None, dir_backup=None):
+    def __init__(self, n_classes='', f_train='', f_valid='', f_test='', f_names='', dir_backup=''):
         self.n_classes = n_classes
         self.f_train = f_train
         self.f_test = f_test

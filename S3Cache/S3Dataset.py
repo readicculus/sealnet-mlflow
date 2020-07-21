@@ -27,15 +27,19 @@ class S3Dataset():
         local_path = self.get_dataset_local_path(dataset_path)
         return os.path.relpath(local_path, self.local_dataset_base)
 
-    def upload_artifact(self, s3_client, artifact_path):
+    def upload_artifact(self, s3_client, artifact_path, checkFirst = True):
         local_file = self.get_dataset_local_path(artifact_path)
         s3_uri = self.get_dataset_uri(artifact_path)
         bucket, key = self.parse_s3_path(s3_uri)
 
-        try:
-            s3_client.head_object(Bucket=bucket, Key=key)
-        except:
+        if checkFirst:
+            try:
+                s3_client.head_object(Bucket=bucket, Key=key)
+            except:
+                s3_client.upload_file(local_file, bucket, key)
+        else:
             s3_client.upload_file(local_file, bucket, key)
+
         return s3_uri
 
     def upload_external_artifacts(self, s3_client,  dataset_path):
