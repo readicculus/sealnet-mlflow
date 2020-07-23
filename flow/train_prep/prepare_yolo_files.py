@@ -5,9 +5,9 @@ import mlflow
 import json
 
 from flow import experiment, s3_dataset
-from flow.train_prep.label_formats.darknet.DataFile import DataFile
-from flow.train_prep.label_formats.darknet.darknet import darknet_format
+from flow.util.label_formats.darknet.DataFile import DataFile
 from flow.util.extract_util import save_dict_artifact, save_list_artifact
+from flow.util.label_formats.darknet.darknet import darknet_format
 
 
 def generate_labels(dataset_path, im_w, im_h, species_map):
@@ -63,6 +63,14 @@ def create_names_file(species_map):
             f.write(el + '\n')
     return os.path.join(dataset_dir, 'names.txt')
 
+def upload_yolo_files_to_s3(s3_client):
+    s3_data_path = s3_dataset.upload_artifact(s3_client, 'yolo.data', checkFirst=False)
+    s3_train_path = s3_dataset.upload_artifact(s3_client, 'train.txt', checkFirst=False)
+    s3_test_path = s3_dataset.upload_artifact(s3_client, 'test.txt', checkFirst=False)
+    mlflow.set_tag('yolo_data_file', s3_data_path)
+    mlflow.set_tag('yolo_train_txt', s3_train_path)
+    mlflow.set_tag('yolo_test_txt', s3_test_path)
+
 def prepare_yolo_files(s3save = False):
     noaa_sess = boto3.session.Session(profile_name='default')
     s3_client = noaa_sess.client('s3')
@@ -70,7 +78,7 @@ def prepare_yolo_files(s3save = False):
     with  mlflow.start_run(run_name='prepare_yolo_files', experiment_id=experiment.experiment_id):
         mlflow.log_param('dataset_uri', s3_dataset.get_dataset_uri(""))
 
-        with open('label_formats/species_map.json') as f:
+        with open('../util/label_formats/species_map.json') as f:
             species_map = json.load(f)
         save_dict_artifact(species_map, 'species_map.json', '')
 
@@ -97,14 +105,11 @@ def prepare_yolo_files(s3save = False):
         data_file_local_path = s3_dataset.get_dataset_local_path('yolo.data')
         data_file.save(data_file_local_path)
 
-        s3_data_path = s3_dataset.upload_artifact(s3_client, 'yolo.data', checkFirst=False)
-        s3_train_path = s3_dataset.upload_artifact(s3_client, 'train.txt', checkFirst=False)
-        s3_test_path = s3_dataset.upload_artifact(s3_client, 'test.txt', checkFirst=False)
-        mlflow.set_tag('yolo_data_file', s3_data_path)
-        mlflow.set_tag('yolo_train_txt', s3_train_path)
-        mlflow.set_tag('yolo_test_txt', s3_test_path)
+        # upload data and train/test files to s3
+        upload_yolo_files_to_s3(s3_client)
+
         if s3save:
-            # save to s3
+            # save to s3, this takes a while
             test_s3_uris = save_to_s3(s3_client, test_labels)
             save_list_artifact(test_s3_uris, 'test_label_files.txt', '')
 

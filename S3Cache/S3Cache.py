@@ -1,6 +1,9 @@
 import json
 import os
 import cv2
+import mlflow
+import torch
+from mlflow import pytorch
 
 class S3Cache():
     def __init__(self, local_dir):
@@ -23,14 +26,27 @@ class S3Cache():
             data = file.read()
         return data
 
-    def get_artifact_local_uri(self, uri):
+    def get_artifact_local_path(self, uri):
         bucket, key = self.parse_s3_path(uri)
         local_path = os.path.join(self.local_dir, bucket, key)
         return local_path
 
+    def save_model(self,model, artifact_path, name):
+        mlflow_artifact_models_uri = mlflow.get_artifact_uri(artifact_path)
+        local_path = self.get_artifact_local_path(mlflow_artifact_models_uri)
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        mlflow.pytorch.save_model(model, os.path.join(local_path, name))
+
+    def save_ckpt(self,ckpt, artifact_path, name):
+        mlflow_artifact_models_uri = mlflow.get_artifact_uri(artifact_path)
+        local_path = self.get_artifact_local_path(mlflow_artifact_models_uri)
+        os.makedirs(local_path, exist_ok=True)
+        torch.save(ckpt, os.path.join(local_path, name))
+        return os.path.join(local_path, name)
+
     # given a cv2 image, cache locally and upload
     def save_image_local(self, im, uri):
-        local_path = self.get_artifact_local_uri(uri)
+        local_path = self.get_artifact_local_path(uri)
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
         if not os.path.exists(local_path):
             cv2.imwrite(local_path, im)
@@ -41,7 +57,7 @@ class S3Cache():
         return local_path
 
     def save_list_local(self, l, uri):
-        local_path = self.get_artifact_local_uri(uri)
+        local_path = self.get_artifact_local_path(uri)
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
         if not os.path.exists(local_path):
             # print("Saving list locally -> %s" % local_path)
@@ -51,7 +67,7 @@ class S3Cache():
         return local_path
 
     def save_json_local(self,obj,uri):
-        local_path = self.get_artifact_local_uri(uri)
+        local_path = self.get_artifact_local_path(uri)
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
         if not os.path.exists(local_path):
             # print("Saving list locally -> %s" % local_path)

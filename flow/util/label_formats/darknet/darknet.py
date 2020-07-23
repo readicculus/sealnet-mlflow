@@ -11,10 +11,10 @@ def darknet_format(json_local_path, im_w, im_h, species_map):
         x2 = label['x2']
         y1 = label['y1']
         y2 = label['y2']
-        x1 = min(0, x1)
-        x2 = max(im_w, x2)
-        y1 = min(0, y1)
-        y2 = max(im_h, y2)
+        x1 = max(0, x1)
+        x2 = min(im_w, x2)
+        y1 = max(0, y1)
+        y2 = min(im_h, y2)
         species_name = label['species']
 
         class_id = species_map[species_name]
