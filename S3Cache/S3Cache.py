@@ -1,3 +1,4 @@
+import inspect
 import json
 import os
 import cv2
@@ -26,11 +27,21 @@ class S3Cache():
             data = file.read()
         return data
 
+    # saves to local and logs to remote
+    # log a function's code
+    def log_function(self, path, function):
+        lines = inspect.getsource(function).split('\n')
+        uri = mlflow.get_artifact_uri(path)
+        local_path = self.save_list_local(lines, uri)
+        mlflow.log_artifact(local_path)
+        return uri, local_path
+
     def get_artifact_local_path(self, uri):
         bucket, key = self.parse_s3_path(uri)
         local_path = os.path.join(self.local_dir, bucket, key)
         return local_path
 
+    # saves to local
     def save_model(self,model, artifact_path, name):
         mlflow_artifact_models_uri = mlflow.get_artifact_uri(artifact_path)
         local_path = self.get_artifact_local_path(mlflow_artifact_models_uri)
