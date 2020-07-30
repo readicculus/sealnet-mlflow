@@ -8,7 +8,6 @@ from noaadb.schema.models import EOImage, HeaderMeta, EOLabelEntry, Species
 from noaadb.schema.models.ml_data import TrainTestSplit, MLType
 from noaadb.schema.models.survey_data import FusedImage
 from sqlalchemy.orm import aliased
-
 from flow import experiment
 
 from flow.util.extract_util import cfs_to_dict, save_dict_artifact, query_filter_cfs, id_from_image_name

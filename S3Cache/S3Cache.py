@@ -36,6 +36,17 @@ class S3Cache():
         mlflow.log_artifact(local_path)
         return uri, local_path
 
+    def log_functions(self, path, functions):
+        lines = []
+        for f in functions:
+            lines = lines + inspect.getsource(f).split('\n')
+            lines.append('')
+        uri = mlflow.get_artifact_uri(path)
+        local_path = self.save_list_local(lines, uri)
+        mlflow.log_artifact(local_path)
+        return uri, local_path
+
+
     def get_artifact_local_path(self, uri):
         bucket, key = self.parse_s3_path(uri)
         local_path = os.path.join(self.local_dir, bucket, key)
@@ -67,14 +78,14 @@ class S3Cache():
         print()
         return local_path
 
-    def save_list_local(self, l, uri):
+    def save_list_local(self, l, uri, exists_ok = True):
         local_path = self.get_artifact_local_path(uri)
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
-        if not os.path.exists(local_path):
+        # if not os.path.exists(local_path):
             # print("Saving list locally -> %s" % local_path)
-            with open(local_path, 'w') as f:
-                for item in l:
-                    f.write("%s\n" % item)
+        with open(local_path, 'w') as f:
+            for item in l:
+                f.write("%s\n" % item)
         return local_path
 
     def save_json_local(self,obj,uri):
