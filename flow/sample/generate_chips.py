@@ -14,8 +14,8 @@ def generate(s3_client, chips_dict_uri, artifact_path):
     bucket, key = parse_s3_path(chips_dict_uri)
     exists = s3_check_exists(s3_client, bucket, key)
     if not exists:
-        mlflow.end_run(status=RunStatus.to_string(RunStatus.KILLED))
         mlflow.set_tag("EXCEPTION", "Given labels dict uri not found: %s" % chips_dict_uri)
+        mlflow.end_run(status=RunStatus.to_string(RunStatus.KILLED))
         return
 
     jsons = s3_cache.read_file(s3_client, bucket, key)
@@ -77,5 +77,8 @@ def generate_chips(test_chips_uri, train_chips_uri):
         s3_dataset.upload_external_artifacts(s3_client, 'train')
 
 
-generate_chips('s3://yboss/mlflow/1/4d395ce4121f4752892c1587674ad7c1/artifacts/test_chips.json',
-               's3://yboss/mlflow/1/4d395ce4121f4752892c1587674ad7c1/artifacts/train_chips.json')
+# generate_chips('s3://yboss/mlflow/1/4d395ce4121f4752892c1587674ad7c1/artifacts/test_chips.json',
+#                's3://yboss/mlflow/1/4d395ce4121f4752892c1587674ad7c1/artifacts/train_chips.json')
+
+generate_chips('s3://yboss/mlflow/3/dbcdd6194db74d62bbc32bfe87598339/artifacts/test_chips.json',
+               's3://yboss/mlflow/3/dbcdd6194db74d62bbc32bfe87598339/artifacts/train_chips.json')

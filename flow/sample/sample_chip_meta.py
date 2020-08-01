@@ -54,7 +54,6 @@ def sample_chip_meta(test_labels_uri, train_labels_uri, chip_dim, chip_overlap_w
     noaa_sess = boto3.session.Session(profile_name='default')
     s3_client = noaa_sess.client('s3')
     with mlflow.start_run(run_name='sample_dataset', experiment_id=experiment.experiment_id) as mlrun:
-        mlflow.set_tag('method_fusion', True)
         mlflow.set_tag('big_artifacts', True)
         mlflow.log_param('test_labels_uri', test_labels_uri)
         mlflow.log_param('train_labels_uri', train_labels_uri)
@@ -74,9 +73,16 @@ def sample_chip_meta(test_labels_uri, train_labels_uri, chip_dim, chip_overlap_w
         save_dict_artifact(chip_labels_train, 'train_chips.json', '')
 
 
+# sample_chip_meta(
+#     's3://yboss/mlflow/1/cbaa821ff3ca4cf89beb3d279a60be2a/artifacts/test_labels.json',
+#     's3://yboss/mlflow/1/cbaa821ff3ca4cf89beb3d279a60be2a/artifacts/train_labels.json',
+#     chip_dim=832,
+#     chip_overlap_w=100,
+#     chip_overlap_h=100, chip_label_overlap_thresh=0.5)
+
 sample_chip_meta(
-    's3://yboss/mlflow/1/cbaa821ff3ca4cf89beb3d279a60be2a/artifacts/test_labels.json',
-    's3://yboss/mlflow/1/cbaa821ff3ca4cf89beb3d279a60be2a/artifacts/train_labels.json',
+    's3://yboss/mlflow/3/ba27a9bdb6f7484d82b379907729aa98/artifacts/test_labels.json',
+    's3://yboss/mlflow/3/ba27a9bdb6f7484d82b379907729aa98/artifacts/train_labels.json',
     chip_dim=832,
     chip_overlap_w=100,
     chip_overlap_h=100, chip_label_overlap_thresh=0.5)

@@ -5,6 +5,7 @@ import cv2
 import mlflow
 import torch
 from mlflow import pytorch
+from PIL import Image
 
 class S3Cache():
     def __init__(self, local_dir):
@@ -75,7 +76,16 @@ class S3Cache():
         # if not s3_check_exists(s3_client, bucket, key):
         #     print("Uploading image to s3 -> s3://%s/%s" % (bucket,key))
         #     s3_upload_image(s3_client, im, bucket, key)
-        print()
+        return local_path
+
+    def save_pil_image_local(self, im, uri, quality= 100):
+        local_path = self.get_artifact_local_path(uri)
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        if not os.path.exists(local_path):
+            im.save(local_path, 'JPEG', quality=quality)
+        # if not s3_check_exists(s3_client, bucket, key):
+        #     print("Uploading image to s3 -> s3://%s/%s" % (bucket,key))
+        #     s3_upload_image(s3_client, im, bucket, key)
         return local_path
 
     def save_list_local(self, l, uri, exists_ok = True):

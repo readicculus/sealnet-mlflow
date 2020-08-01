@@ -33,7 +33,8 @@ def query_fused_labels(s, cfs_entries, species_filter, species_mappings):
 
     # get the fused images with headers from that camera
     eo_im = aliased(EOImage)
-    fused = s.query(FusedImage, TrainTestSplit).outerjoin(TrainTestSplit, TrainTestSplit.image_id == FusedImage.eo_image_id)\
+    fused = s.query(FusedImage, TrainTestSplit)\
+        .join(TrainTestSplit, TrainTestSplit.image_id == FusedImage.eo_image_id)\
         .join(FusedImage.eo_image).join(HeaderMeta)\
         .filter(HeaderMeta.camera_id.in_(cam_ids)).all()
 
